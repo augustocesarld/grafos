@@ -8,12 +8,18 @@ public class Vertice {
     
     private String descricao;
     private int grau, grauEntrada, grauSaida;
+    private float distanciaAcumulada;
+    private boolean aberto;
+    private Vertice vAnterior;
 
     public Vertice(String descricao) {
         this.descricao = descricao;
         this.grau = 0;
         this.grauEntrada = 0;
         this.grauSaida = 0;
+        this.distanciaAcumulada = 0;
+        this.aberto = false;
+        this.vAnterior = null;
     }
 
     public String getDescricao() {
@@ -46,6 +52,30 @@ public class Vertice {
 
     public void setGrauSaida(int grauSaida) {
         this.grauSaida = grauSaida;
+    }
+
+    public float getDistanciaAcumulada() {
+        return distanciaAcumulada;
+    }
+
+    public void setDistanciaAcumulada(float distanciaAcumulada) {
+        this.distanciaAcumulada = distanciaAcumulada;
+    }
+
+    public boolean isAberto() {
+        return aberto;
+    }
+
+    public void setAberto(boolean aberto) {
+        this.aberto = aberto;
+    }
+
+    public Vertice getVertAnterior() {
+        return vAnterior;
+    }
+
+    public void setVertAnterior(Vertice vAnterior) {
+        this.vAnterior = vAnterior;
     }
     
     @Override

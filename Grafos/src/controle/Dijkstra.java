@@ -1,8 +1,8 @@
 package controle;
 
 import java.util.ArrayList;
-import modelo.Aresta;
 import modelo.Grafo;
+import modelo.Rota;
 import modelo.Vertice;
 
 /**
@@ -11,56 +11,61 @@ import modelo.Vertice;
 
 public abstract class Dijkstra {
 
-    public static float getMenorDistancia (Grafo g, Vertice vInicial, Vertice vFinal) {
-        //Descartar casos irrelevantes
-        if (vInicial.equals(vFinal)) return 0.0f;
-        if (!g.possuiVertice(vInicial) || !g.possuiVertice(vFinal)) return -1.0f;
+    public static Rota getRotaMenorDistancia (Grafo g, Vertice vInicial, Vertice vFinal) {
+        //Criação do objeto Rota
+        Rota r = new Rota(g);
 
-        //Armazenar distância de cada vértice ao inicial
-        float [] distancia = new float[g.getVertices().size()];
-        boolean [] status = new boolean[g.getVertices().size()];
-        
+        //Descartar casos irrelevantes
+        if (vInicial.equals(vFinal)) return r;
+        if (!g.possuiVertice(vInicial) || !g.possuiVertice(vFinal)) return r;
+
         //Setar inicialmente a distância do vértice inicial aos outros como Infinito, exceto ele mesmo
-        for (int i = 0; i < distancia.length; i++) {
-            distancia[i] = Float.POSITIVE_INFINITY;
-            status[i] = true;
+        for (int i = 0; i < g.getVertices().size(); i++) {
+            g.getVertices().get(i).setDistanciaAcumulada(Float.POSITIVE_INFINITY);
+            g.getVertices().get(i).setAberto(true);
         }
-        int indexInicial = getIndex(g, vInicial);
-        distancia[indexInicial] = 0;
-        int indexFinal = getIndex(g, vFinal);
+        vInicial.setDistanciaAcumulada(0.0f);
          
         //Verificar a partir dos vértices abertos com menor distância agregada
-        while (hasNext(status)) {
-            int atual = getIndexMenorDistancia(status, distancia);
-            status[atual] = false;
-            ArrayList<Vertice> vs = g.getIncidentes(g.getVertices().get(atual));
+        while (hasNext(g)) {
+            Vertice vAtual = getVerticeMenorDistancia(g);
+            vAtual.setAberto(false);
+            ArrayList<Vertice> vs = g.getIncidentes(vAtual);
             for (Vertice v: vs) {
-                float dist = distancia[atual] + g.getDistanciaDireta(g.getVertices().get(atual), v);
-                if (dist < distancia[getIndex(g, v)]) distancia[getIndex(g,v)] = dist;
+                float dist = vAtual.getDistanciaAcumulada() + g.getDistanciaDireta(vAtual, v);
+                if (dist < v.getDistanciaAcumulada()) {
+                    v.setDistanciaAcumulada(dist);
+                    v.setVertAnterior(vAtual);
+                }
             }
         }
         
-        return distancia[indexFinal];
+        //Montar a rota
+        if (vFinal.getDistanciaAcumulada() != Float.POSITIVE_INFINITY) {
+            Vertice v = vFinal;
+            r.adicionarVertice(v);
+            while (v.getVertAnterior() != null) {
+                r.adicionarVertice(v.getVertAnterior());
+                v = v.getVertAnterior();
+            }
+        }
+        
+        return r;
     }
     
-    private static boolean hasNext (boolean [] status) {
-        for (int i = 0; i < status.length; i++) if (status[i]) return true;
+    private static boolean hasNext (Grafo g) {
+        for (Vertice v : g.getVertices()) if (v.isAberto()) return true;
         return false;
     }
     
-    private static int getIndex (Grafo g, Vertice v) {
-        for (int i = 0; i < g.getVertices().size(); i++) if (g.getVertices().get(i).equals(v)) return i;
-        return -1;
-    }
-    
-    private static int getIndexMenorDistancia (boolean [] status, float [] distancia) {
-        int indexMenor = -1;
-        for (int i = 0; i < status.length; i++) {
-            if (status[i]) {
-                if (indexMenor == -1) indexMenor = i;
-                else if (distancia[i] < distancia[indexMenor]) indexMenor = i;
+    private static Vertice getVerticeMenorDistancia (Grafo g) {
+        Vertice vMenor = null;
+        for (Vertice vAtual : g.getVertices()) {
+            if (vAtual.isAberto()) {
+                if (vMenor == null) vMenor = vAtual;
+                else if (vAtual.getDistanciaAcumulada() < vMenor.getDistanciaAcumulada()) vMenor = vAtual;
             }
         }
-        return indexMenor;
+        return vMenor;
     }
 }

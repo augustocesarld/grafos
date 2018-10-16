@@ -6,6 +6,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import modelo.Aresta;
 import modelo.Grafo;
+import modelo.Rota;
 import modelo.Vertice;
 
 /**
@@ -382,6 +383,7 @@ public class Dashboard extends javax.swing.JFrame {
     private void btnAddArestaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddArestaActionPerformed
         try {
             Aresta a = new Aresta((Vertice)jcbVertOrigem.getSelectedItem(), (Vertice)jcbVertDestino.getSelectedItem(), Float.parseFloat(inputDistancia.getText()), inputDirigido.isSelected());
+            if (a.getDistancia() < 0) throw new Exception();
             if (!g.adicionarAresta(a)) throw new Exception(); 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Informe as informações corretas e tente novamente!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -425,9 +427,10 @@ public class Dashboard extends javax.swing.JFrame {
         try {
             Vertice v1 = (Vertice)inputVertInicio.getSelectedItem();
             Vertice v2 = (Vertice)inputVertFim.getSelectedItem();
-            float distancia = Dijkstra.getMenorDistancia(g, v1, v2);
-            if (distancia == Float.POSITIVE_INFINITY) JOptionPane.showMessageDialog(this, "Não existe uma rota entre esses vértices!", "Erro", JOptionPane.ERROR_MESSAGE);
-            else JOptionPane.showMessageDialog(this, "A menor distância entre esses vértices é " + distancia + ".", "Resultado", JOptionPane.INFORMATION_MESSAGE);
+            Rota r = Dijkstra.getRotaMenorDistancia(g, v1, v2);
+            if (r.getDistancia() == Float.POSITIVE_INFINITY) JOptionPane.showMessageDialog(this, "Não existe uma rota entre esses vértices!", "Erro", JOptionPane.ERROR_MESSAGE);
+            else if (r.getDistancia() > 0) JOptionPane.showMessageDialog(this, "A menor distância entre esses vértices é " + r.getDistancia() + ".\n\n\nRota:\n" + r.toString(), "Resultado", JOptionPane.INFORMATION_MESSAGE);
+            else JOptionPane.showMessageDialog(this, "A menor distância entre esses vértices é " + r.getDistancia() + ".", "Resultado", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Não foi possível realizar o cálculo!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
